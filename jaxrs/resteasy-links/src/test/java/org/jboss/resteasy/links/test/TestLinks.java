@@ -1,7 +1,7 @@
 package org.jboss.resteasy.links.test;
 
 import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.jboss.resteasy.client.ProxyFactory;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.jboss.resteasy.core.Dispatcher;
@@ -61,7 +61,7 @@ public class TestLinks
 	public void before(){
 		POJOResourceFactory noDefaults = new POJOResourceFactory(resourceType);
 		dispatcher.getRegistry().addResourceFactory(noDefaults);
-		httpClient = new DefaultHttpClient();
+		httpClient = HttpClientBuilder.create().build(); 
 		ApacheHttpClient4Executor executor = new ApacheHttpClient4Executor(httpClient);
 		url = generateBaseUrl();
 		client = ProxyFactory.create(BookStoreService.class, url,

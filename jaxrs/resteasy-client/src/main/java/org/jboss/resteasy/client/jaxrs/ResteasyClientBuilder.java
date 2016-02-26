@@ -1,21 +1,24 @@
 package org.jboss.resteasy.client.jaxrs;
 
-import org.apache.http.client.params.HttpClientParams;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
-import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContexts;
+
 import org.apache.http.conn.ssl.StrictHostnameVerifier;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.HttpHost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.BasicClientConnectionManager;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.jboss.resteasy.client.jaxrs.engines.PassthroughTrustManager;
 import org.jboss.resteasy.client.jaxrs.i18n.Messages;
@@ -400,7 +403,7 @@ public class ResteasyClientBuilder extends ClientBuilder
 
    protected ClientHttpEngine initDefaultEngine()
    {
-      DefaultHttpClient httpClient = null;
+      HttpClient httpClient = null;
 
       X509HostnameVerifier verifier = null;
       if (this.verifier != null) verifier = new VerifierWrapper(this.verifier);
@@ -421,7 +424,7 @@ public class ResteasyClientBuilder extends ClientBuilder
       }
       try
       {
-         SSLSocketFactory sslsf = null;
+         SSLConnectionSocketFactory sslsf = null;
          SSLContext theContext = sslContext;
          if (disableTrustManager)
          {
@@ -429,57 +432,66 @@ public class ResteasyClientBuilder extends ClientBuilder
             theContext.init(null, new TrustManager[]{new PassthroughTrustManager()},
                     new SecureRandom());
             verifier =  new AllowAllHostnameVerifier();
-            sslsf = new SSLSocketFactory(theContext, verifier);
+            sslsf = new SSLConnectionSocketFactory(theContext, verifier);
          }
          else if (theContext != null)
          {
-            sslsf = new SSLSocketFactory(theContext, verifier);
+            sslsf = new SSLConnectionSocketFactory(theContext, verifier);
          }
          else if (clientKeyStore != null || truststore != null)
          {
-            sslsf = new SSLSocketFactory(SSLSocketFactory.TLS, clientKeyStore, clientPrivateKeyPassword, truststore, null, verifier);
+            SSLContext sslContext = SSLContexts.custom().useTLS().loadKeyMaterial(clientKeyStore, clientPrivateKeyPassword.toCharArray())
+                    .loadTrustMaterial(truststore)
+                    .build();
+            sslsf = new SSLConnectionSocketFactory(sslContext, verifier);
          }
          else
          {
             //sslsf = new SSLSocketFactory(SSLContext.getInstance(SSLSocketFactory.TLS), verifier);
-            final SSLContext tlsContext = SSLContext.getInstance(SSLSocketFactory.TLS);
+            final SSLContext tlsContext = SSLContext.getInstance(SSLConnectionSocketFactory.TLS);
             tlsContext.init(null, null, null);
-            sslsf = new SSLSocketFactory(tlsContext, verifier);
+            sslsf = new SSLConnectionSocketFactory(tlsContext, verifier);
          }
-         SchemeRegistry registry = new SchemeRegistry();
-         registry.register(
-                 new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-         Scheme httpsScheme = new Scheme("https", 443, sslsf);
-         registry.register(httpsScheme);
-         ClientConnectionManager cm = null;
+         
+         Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
+                 .register("https", sslsf)
+                 .register("http",PlainConnectionSocketFactory.getSocketFactory())
+                 .build();
+
+         HttpClientConnectionManager cm = null;
          if (connectionPoolSize > 0)
          {
-            PoolingClientConnectionManager tcm = new PoolingClientConnectionManager(registry, connectionTTL, connectionTTLUnit);
+            //TODO: never closed?
+            PoolingHttpClientConnectionManager tcm = new PoolingHttpClientConnectionManager(registry, null, null, null, connectionTTL, connectionTTLUnit);
             tcm.setMaxTotal(connectionPoolSize);
             if (maxPooledPerRoute == 0) maxPooledPerRoute = connectionPoolSize;
             tcm.setDefaultMaxPerRoute(maxPooledPerRoute);
             cm = tcm;
-
          }
          else
          {
-            cm = new BasicClientConnectionManager(registry);
+            cm = new BasicHttpClientConnectionManager(registry);
          }
-         BasicHttpParams params = new BasicHttpParams();
+
+         RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
          if (socketTimeout > -1)
          {
-            HttpConnectionParams.setSoTimeout(params, (int) socketTimeoutUnits.toMillis(socketTimeout));
+             requestConfigBuilder.setSocketTimeout((int) socketTimeoutUnits.toMillis(socketTimeout));
 
          }
          if (establishConnectionTimeout > -1)
          {
-            HttpConnectionParams.setConnectionTimeout(params, (int)establishConnectionTimeoutUnits.toMillis(establishConnectionTimeout));
+             requestConfigBuilder.setConnectTimeout((int)establishConnectionTimeoutUnits.toMillis(establishConnectionTimeout));
          }
          if (connectionCheckoutTimeoutMs > -1)
          {
-             HttpClientParams.setConnectionManagerTimeout(params, connectionCheckoutTimeoutMs);
+             //?
+             requestConfigBuilder.setConnectionRequestTimeout(connectionCheckoutTimeoutMs);
          }
-         httpClient = new DefaultHttpClient(cm, params);
+         httpClient = HttpClientBuilder.create().setConnectionManager(cm)
+                 .setDefaultRequestConfig(requestConfigBuilder.build())
+                 .build(); 
+
          ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient, true);
          engine.setResponseBufferSize(responseBufferSize);
          engine.setHostnameVerifier(verifier);

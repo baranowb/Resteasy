@@ -4,7 +4,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.resteasy.core.MediaTypeMap;
@@ -126,7 +126,7 @@ public class RegressionBasketTest extends BaseResourceTest
    @Test
    public void test583() throws Exception
    {
-      HttpClient client = new DefaultHttpClient();
+      HttpClient client = HttpClientBuilder.create().build();
       HttpPut method = new HttpPut(generateURL("/api"));
       HttpResponse response = null;
       try

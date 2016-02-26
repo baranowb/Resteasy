@@ -3,7 +3,7 @@ package org.jboss.resteasy.test.nextgen.client;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -114,7 +114,7 @@ public class ClientExecutorShutdownTest extends BaseResourceTest
    @Test
    public void testApacheHttpClient4ExecutorSharedHttpClientFinalize() throws Throwable
    {
-      HttpClient httpClient = new DefaultHttpClient();
+      HttpClient httpClient = HttpClientBuilder.create().build();
       ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
       ResteasyClient client = new ResteasyClientBuilder().httpEngine(engine).build();
       Response response = client.target(generateURL("/test")).request().post(null);
@@ -135,7 +135,7 @@ public class ClientExecutorShutdownTest extends BaseResourceTest
    @Test
    public void testApacheHttpClient4ExecutorSharedHttpClientClose() throws Throwable
    {
-      HttpClient httpClient = new DefaultHttpClient();
+      HttpClient httpClient = HttpClientBuilder.create().build();
       ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
       ResteasyClient client = new ResteasyClientBuilder().httpEngine(engine).build();
       Response response = client.target(generateURL("/test")).request().post(null);

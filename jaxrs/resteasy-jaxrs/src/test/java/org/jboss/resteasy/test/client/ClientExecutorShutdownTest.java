@@ -3,7 +3,7 @@ package org.jboss.resteasy.test.client;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
@@ -157,7 +157,7 @@ public class ClientExecutorShutdownTest extends BaseResourceTest
    @Test
    public void testApacheHttpClient4ExecutorSharedHttpClientFinalize() throws Throwable
    {
-      HttpClient httpClient = new DefaultHttpClient();
+      HttpClient httpClient = HttpClientBuilder.create().build();
       ApacheHttpClient4Executor executor = new ApacheHttpClient4Executor(httpClient);
       ClientRequest request = new ClientRequest(generateURL("/test"), executor);
       ClientResponse<?> response = request.post();
@@ -178,7 +178,7 @@ public class ClientExecutorShutdownTest extends BaseResourceTest
    @Test
    public void testApacheHttpClient4ExecutorSharedHttpClientClose() throws Throwable
    {
-      HttpClient httpClient = new DefaultHttpClient();
+      HttpClient httpClient = HttpClientBuilder.create().build();
       ApacheHttpClient4Executor executor = new ApacheHttpClient4Executor(httpClient);
       ClientRequest request = new ClientRequest(generateURL("/test"), executor);
       ClientResponse<?> response = request.post();

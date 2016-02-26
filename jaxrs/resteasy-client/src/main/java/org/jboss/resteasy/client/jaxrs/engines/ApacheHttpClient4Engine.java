@@ -1,9 +1,9 @@
 package org.jboss.resteasy.client.jaxrs.engines;
 
 import org.apache.commons.io.output.DeferredFileOutputStream;
-import org.apache.http.conn.ClientConnectionManager;
+
 import org.apache.http.entity.FileEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -12,7 +12,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicHeader;
@@ -121,7 +120,7 @@ public class ApacheHttpClient4Engine implements ClientHttpEngine
 
    public ApacheHttpClient4Engine()
    {
-      this.httpClient = new DefaultHttpClient();
+      this.httpClient = HttpClientBuilder.create().build(); 
       this.createdHttpClient = true;
    }
 
@@ -236,15 +235,18 @@ public class ApacheHttpClient4Engine implements ClientHttpEngine
       this.hostnameVerifier = hostnameVerifier;
    }
 
+   @Deprecated
    public HttpHost getDefaultProxy()
    {
-	   return (HttpHost) httpClient.getParams().getParameter(ConnRoutePNames.DEFAULT_PROXY);
+	   return (HttpHost) httpClient.getParams().getParameter(ConnRoutePNames .DEFAULT_PROXY);
    }
    
+   @Deprecated
    public void setDefaultProxy(HttpHost defaultProxy)
    {
 	   httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, defaultProxy);
    }
+
    public static CaseInsensitiveMap<String> extractHeaders(
            HttpResponse response)
    {
@@ -403,14 +405,15 @@ public class ApacheHttpClient4Engine implements ClientHttpEngine
 
    protected void loadHttpMethod(final ClientInvocation request, HttpRequestBase httpMethod) throws Exception
    {
-      if (httpMethod instanceof HttpGet && false) // todo  && request.followRedirects())
-      {
-         HttpClientParams.setRedirecting(httpMethod.getParams(), true);
-      }
-      else
-      {
-         HttpClientParams.setRedirecting(httpMethod.getParams(), false);
-      }
+      //TODO: specific RequestConfig
+      //if (httpMethod instanceof HttpGet && false) // todo  && request.followRedirects())
+      //{
+      //   HttpClientParams.setRedirecting(httpMethod.getParams(), true);
+      //}
+      //else
+      //{
+      //   HttpClientParams.setRedirecting(httpMethod.getParams(), false);
+      //}
 
       if (request.getEntity() != null)
       {
@@ -457,11 +460,9 @@ public class ApacheHttpClient4Engine implements ClientHttpEngine
 
       if (createdHttpClient && httpClient != null)
       {
-         ClientConnectionManager manager = httpClient.getConnectionManager();
-         if (manager != null)
-         {
-            manager.shutdown();
-         }
+         //TODO: deprecated
+         httpClient.getConnectionManager().shutdown();
+         httpClient = null;
       }
       closed = true;
    }

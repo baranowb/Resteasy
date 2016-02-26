@@ -14,10 +14,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.CoreConnectionPNames;
-import org.apache.http.params.HttpParams;
+import org.apache.http.config.ConnectionConfig;
+import org.apache.http.config.SocketConfig;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.jboss.resteasy.test.BaseResourceTest;
 import org.jboss.resteasy.test.TestPortProvider;
 import org.junit.Before;
@@ -57,10 +57,12 @@ public class RESTEASY779Test extends BaseResourceTest {
     @Test
     public void testDataSourceProvider() throws Exception
     {
-        HttpParams params = new BasicHttpParams();
         // important - see https://issues.jboss.org/browse/RESTEASY-779
-        params.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, (BigDataResource.KBs - 1)  * 1024);
-        HttpClient httpClient = new DefaultHttpClient(params);
+        final ConnectionConfig connectionConfig = ConnectionConfig.custom().setBufferSize((BigDataResource.KBs - 1)  * 1024).build();
+        final BasicHttpClientConnectionManager connectionManager = new BasicHttpClientConnectionManager();
+        connectionManager.setConnectionConfig(connectionConfig);
+        final HttpClient httpClient = HttpClientBuilder.create().setConnectionManager(connectionManager)
+                .build(); 
         HttpGet httpGet = new HttpGet(TestPortProvider.generateURL("/"));
         HttpResponse response = httpClient.execute(httpGet);
         InputStream inputStream = null;

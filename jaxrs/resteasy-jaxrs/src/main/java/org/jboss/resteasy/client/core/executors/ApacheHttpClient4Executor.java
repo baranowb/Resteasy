@@ -13,7 +13,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
@@ -110,7 +110,7 @@ public class ApacheHttpClient4Executor implements ClientExecutor
 
    public ApacheHttpClient4Executor()
    {
-      this(new DefaultHttpClient(), null);
+      this(HttpClientBuilder.create().build(), null);
       this.createdHttpClient = true;
    }
 

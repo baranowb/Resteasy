@@ -3,7 +3,7 @@ package org.jboss.resteasy.test.client;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.jboss.resteasy.test.BaseResourceTest;
 import org.jboss.resteasy.test.TestPortProvider;
@@ -24,6 +24,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -165,7 +166,7 @@ public class TraceTest extends BaseResourceTest
       String uri = generateURL("/resource/trace");
 
       System.out.println(uri);
-      HttpClient client = new DefaultHttpClient();
+      HttpClient client = HttpClientBuilder.create().build();
       CustomHttpTrace trace = new CustomHttpTrace(uri);
       HttpResponse response = client.execute(trace);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());

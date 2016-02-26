@@ -3,7 +3,7 @@ package org.jboss.resteasy.test.interceptors;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.jboss.resteasy.annotations.GZIP;
 import org.jboss.resteasy.client.ClientRequest;
@@ -276,7 +276,7 @@ public class GzipTest extends BaseResourceTest
    {
       // test that it was zipped by running it through Apache HTTP Client which does not automatically unzip
 
-      HttpClient client = new DefaultHttpClient();
+      HttpClient client = HttpClientBuilder.create().build();
       {
          HttpGet get = new HttpGet(TestPortProvider.generateURL("/encoded/text"));
          get.addHeader("Accept-Encoding", "gzip, deflate");
@@ -309,7 +309,7 @@ public class GzipTest extends BaseResourceTest
    {
       // test that if there is no accept-encoding: gzip header that result isn't encoded
 
-      HttpClient client = new DefaultHttpClient();
+      HttpClient client = HttpClientBuilder.create().build();
       HttpGet get = new HttpGet(TestPortProvider.generateURL("/encoded/text"));
       HttpResponse response = client.execute(get);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());

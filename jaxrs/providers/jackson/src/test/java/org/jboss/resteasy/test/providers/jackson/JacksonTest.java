@@ -1,9 +1,5 @@
 package org.jboss.resteasy.test.providers.jackson;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.codehaus.jackson.annotate.JsonProperty;
 import org.jboss.resteasy.annotations.providers.NoJackson;
 import org.jboss.resteasy.annotations.providers.jaxb.json.BadgerFish;
 import org.jboss.resteasy.client.ClientRequest;
@@ -17,8 +13,6 @@ import org.junit.Test;
 
 import javax.ws.rs.*;
 import javax.xml.bind.annotation.*;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
 import static org.jboss.resteasy.test.TestPortProvider.generateBaseUrl;
 import static org.jboss.resteasy.test.TestPortProvider.generateURL;

@@ -1,7 +1,7 @@
 package org.jboss.resteasy.test.xml;
 
 import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.jboss.resteasy.annotations.providers.jaxb.json.Mapped;
 import org.jboss.resteasy.client.ProxyFactory;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
@@ -55,7 +55,7 @@ public class TestJAXB
       POJOResourceFactory noDefaults = new POJOResourceFactory(BookStore.class);
       dispatcher.getRegistry().addResourceFactory(noDefaults);
 
-      HttpClient httpClient = new DefaultHttpClient();
+      HttpClient httpClient = HttpClientBuilder.create().build();
       ApacheHttpClient4Executor executor = new ApacheHttpClient4Executor(httpClient);
       BookStoreClient client = ProxyFactory.create(BookStoreClient.class, generateBaseUrl(),
               executor);

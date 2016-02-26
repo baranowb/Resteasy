@@ -1,7 +1,7 @@
 package org.jboss.resteasy.test.client.core;
 
 import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.resteasy.client.ProxyFactory;
@@ -97,7 +97,7 @@ public class ClientErrorInterceptorTest extends BaseResourceTest
    @Test
    public void testStreamClosedWhenGetEntity() throws Exception
    {
-      HttpClient httpClient = new DefaultHttpClient();
+      HttpClient httpClient = HttpClientBuilder.create().build();
       ClientExecutor clientExecutor = new ApacheHttpClient4Executor(httpClient);
 
       ResteasyProviderFactory pf = ResteasyProviderFactory.getInstance();
@@ -119,7 +119,7 @@ public class ClientErrorInterceptorTest extends BaseResourceTest
    @Test
    public void testStreamClosedWhenGetEntityForVoid() throws Exception
    {
-      HttpClient httpClient = new DefaultHttpClient();
+      HttpClient httpClient = HttpClientBuilder.create().build();
       ClientExecutor clientExecutor = new ApacheHttpClient4Executor(httpClient);
 
       ResteasyProviderFactory pf = ResteasyProviderFactory.getInstance();

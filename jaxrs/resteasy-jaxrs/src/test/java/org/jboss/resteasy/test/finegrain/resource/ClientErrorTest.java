@@ -4,7 +4,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.resteasy.core.Dispatcher;
@@ -257,7 +257,7 @@ public class ClientErrorTest
    @Test
    public void testBadContentType()
    {
-      HttpClient client = new DefaultHttpClient();
+      HttpClient client = HttpClientBuilder.create().build();
       HttpPost method = new HttpPost(generateURL("/"));
       HttpResponse response = null;
       try

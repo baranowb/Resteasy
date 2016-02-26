@@ -2,8 +2,10 @@ package org.jboss.resteasy.test.nextgen.providers.jackson;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import javax.xml.bind.annotation.*;
@@ -425,7 +427,7 @@ public class JacksonTest extends BaseResourceTest
     @Test
     public void testJacksonJAXB() throws Exception {
         {
-            DefaultHttpClient client = new DefaultHttpClient();
+            HttpClient client = HttpClientBuilder.create().build();
             HttpGet get = new HttpGet(generateBaseUrl() + "/jaxb");
             HttpResponse response = client.execute(get);
             BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
@@ -433,7 +435,7 @@ public class JacksonTest extends BaseResourceTest
         }
 
         {
-            DefaultHttpClient client = new DefaultHttpClient();
+            HttpClient client = HttpClientBuilder.create().build();
             HttpGet get = new HttpGet(generateBaseUrl() + "/jaxb/json");
             HttpResponse response = client.execute(get);
             BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));

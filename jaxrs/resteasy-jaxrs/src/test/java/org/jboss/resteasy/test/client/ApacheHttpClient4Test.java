@@ -1,13 +1,13 @@
 package org.jboss.resteasy.test.client;
 
 import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.params.ConnManagerParams;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.jboss.resteasy.client.ClientRequest;
@@ -262,20 +262,19 @@ public class ApacheHttpClient4Test extends BaseResourceTest
 
    private ApacheHttpClient4Executor createClient()
    {
-      HttpParams params = new BasicHttpParams();
-      ConnManagerParams.setMaxTotalConnections(params, 3);
-      ConnManagerParams.setTimeout(params, 5000);
+       Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
+               .register("http",PlainConnectionSocketFactory.getSocketFactory())
+               .build();
+       
+      PoolingHttpClientConnectionManager tcm = new PoolingHttpClientConnectionManager(registry);
+      tcm.setMaxTotal(3);
 
-      // Create and initialize scheme registry
-      SchemeRegistry schemeRegistry = new SchemeRegistry();
-      schemeRegistry.register(
-              new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+      RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
+      requestConfigBuilder.setConnectionRequestTimeout(5000);
 
-      // Create an HttpClient with the ThreadSafeClientConnManager.
-      // This connection manager must be used if more than one thread will
-      // be using the HttpClient.
-      ClientConnectionManager cm = new ThreadSafeClientConnManager(params, schemeRegistry);
-      HttpClient httpClient = new DefaultHttpClient(cm, params);
+      HttpClient httpClient = HttpClientBuilder.create().setConnectionManager(tcm)
+              .setDefaultRequestConfig(requestConfigBuilder.build())
+              .build(); 
 
       final ApacheHttpClient4Executor executor = new ApacheHttpClient4Executor(httpClient);
       return executor;
